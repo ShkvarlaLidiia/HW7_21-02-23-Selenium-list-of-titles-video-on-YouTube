@@ -1,0 +1,73 @@
+напишіть на Python з Selenium тест для такого завдання: відкрити Youtube та отримати перелік назв рекомендованих відео та записати їх у файл.
+Для виконання цього завдання необхідно спочатку встановити бібліотеку Selenium для Python і відповідний веб-драйвер для веб-браузера Google Chrome. Тоді можна перейти до написання коду тесту:
+
+
+from selenium import webdriver
+import time
+
+# створення екземпляру веб-драйвера
+driver = webdriver.Chrome()
+
+# відкриття Youtube
+driver.get("https://www.youtube.com/")
+
+# знайти блок рекомендованих відео
+recommended_videos = driver.find_element_by_css_selector("#contents > ytd-rich-grid-renderer")
+
+# отримати назви всіх відео в блоку рекомендованих відео
+video_titles = recommended_videos.find_elements_by_css_selector("#video-title")
+
+# записати назви відео у файл
+with open("recommended_videos.txt", "w") as f:
+    for title in video_titles:
+        f.write(title.get_attribute("title") + "\n")
+
+# закрити веб-драйвер
+driver.quit()
+
+
+
+У цьому тесті спочатку створюється екземпляр веб-драйвера для веб-браузера Google Chrome. Потім відкривається сторінка Youtube і шукається блок рекомендованих відео за допомогою селектора CSS. Далі підтримуються всі назви відео в цьому блоці, і записуються у файл з назвою "recommended_videos.txt". Нарешті, веб-драйвер закривається за допомогою методу "quit()".
+
+
+selenium.common.exceptions.NoSuchElementException: Повідомлення: такого елемента немає: Неможливо знайти елемент: {"method":"css selector","selector":"#contents > ytd-rich-grid-renderer"}   
+Ця помилка виникає, коли веб-драйвер не може знайти елементи на сторінці за вказаним селектором CSS.
+
+Є кілька можливих причин, чому така помилка може виникнути:
+
+Селектор CSS не відповідає дійсному розташуванню елемента на сторінці.
+Елемент ще не завантажений на сторінку, коли було викликано метод пошуку.
+Сторінка змінилася після того, як було виконано відкриття сторінки, тому селектор CSS вже не знайшов потрібний елемент.
+Для вирішення цієї помилки можна спробувати наступні рішення:
+
+Перевірте селектор CSS і переконайтеся, що він відповідає дійсному розташуванню елемента на сторінці.
+Застосувати метод очікування, який дозволяє дочекатися завантаження елементів перед його пошуком.
+Перезавантажте сторінку та знову виконайте елементи пошуку.
+Ось приклад коду з використанням методу очікування перед пошуковим елементом:
+
+Скопіюйте код
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# створення екземпляру веб-драйвера
+driver = webdriver.Chrome()
+
+# відкриття Youtube
+driver.get("https://www.youtube.com/")
+
+# очікування, що блок рекомендованих відео буде завантажений на сторінку
+wait = WebDriverWait(driver, 10)
+recommended_videos = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#contents > ytd-rich-grid-renderer")))
+
+# отримати назви всіх відео в блоку рекомендованих відео
+video_titles = recommended_videos.find_elements_by_css_selector("#video-title")
+
+# записати назви відео у файл
+with open("recommended_videos.txt", "w") as f:
+    for title in video_titles:
+        f.write(title.get_attribute("title") + "\n")
+
+# закрити веб-драйвер
+driver.quit()
